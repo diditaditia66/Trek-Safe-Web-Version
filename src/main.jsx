@@ -3,10 +3,10 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import { configureAmplify } from './amplifyClient'
-import { AmplifyProvider, Authenticator } from '@aws-amplify/ui-react'
+import { ThemeProvider, Authenticator } from '@aws-amplify/ui-react'
 import '@aws-amplify/ui-react/styles.css'
 import ErrorBoundary from './ErrorBoundary'
-import { trekTheme } from './ui/theme' // pastikan file ini ada (lihat tema yang kuberikan)
+import { trekTheme } from './ui/theme'
 
 const rootEl = document.getElementById('root')
 if (!rootEl) throw new Error('Root element #root tidak ditemukan')
@@ -21,13 +21,13 @@ root.render(<div style={{ padding: 24, textAlign: 'center' }}>Loading…</div>)
 
     root.render(
       <React.StrictMode>
-        <AmplifyProvider theme={trekTheme}>
+        <ThemeProvider theme={trekTheme}>
           <ErrorBoundary>
             <Authenticator.Provider>
               <App />
             </Authenticator.Provider>
           </ErrorBoundary>
-        </AmplifyProvider>
+        </ThemeProvider>
       </React.StrictMode>
     )
   } catch (e) {
