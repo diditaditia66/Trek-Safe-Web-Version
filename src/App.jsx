@@ -20,32 +20,36 @@ function Loader() {
 }
 
 function Protected({ children }) {
+  // ✅ Semua hook dipanggil di top-level (tidak dalam kondisi yang berubah-ubah)
   const { authStatus } = useAuthenticator(ctx => [ctx.authStatus])
   const location = useLocation()
   const navigate = useNavigate()
 
-  // Tahan render saat Amplify masih konfigurasi
-  if (authStatus === 'configuring') return <Loader />
-
   // Deteksi callback OAuth (kembali dari Google/Cognito)
   const qs = location.search || ''
   const hash = location.hash || ''
-  const isOAuthCallback = /[?&](code|state)=/.test(qs) || /(code|state)=/.test(hash)
+  const isOAuthCallback =
+    /[?&](code|state)=/.test(qs) || /(code|state)=/.test(hash)
+
+  // ✅ useEffect SELALU terdaftar di setiap render (tidak pernah terlewati)
+  // Membersihkan query/hash callback setelah berhasil login
+  useEffect(() => {
+    if (isOAuthCallback && authStatus === 'authenticated') {
+      const to = (location.state && location.state.from) || { pathname: '/' }
+      navigate(to, { replace: true })
+    }
+  }, [isOAuthCallback, authStatus, navigate, location.state])
+
+  // ⬇️ Setelah semua hook terdaftar, barulah lakukan return bersyarat
+  if (authStatus === 'configuring') return <Loader />
 
   // Jika ini callback & belum authenticated → tunggu (tampilkan loader)
   if (isOAuthCallback && authStatus !== 'authenticated') return <Loader />
 
-  // Jika sudah authenticated tetapi URL masih ada code/state → bersihkan & ke tujuan
-  useEffect(() => {
-    if (isOAuthCallback && authStatus === 'authenticated') {
-      const to = (location.state && location.state.from) || { pathname: '/' }
-      navigate(to, { replace: true }) // buang query callback dari address bar
-    }
-  }, [isOAuthCallback, authStatus, navigate]) // eslint-disable-line react-hooks/exhaustive-deps
-
   if (authStatus !== 'authenticated') {
     return <Navigate to="/sign-in" replace state={{ from: location }} />
   }
+
   return children
 }
 
