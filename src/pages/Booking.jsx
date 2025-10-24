@@ -1,15 +1,18 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+
 export default function Booking() {
   const nav = useNavigate()
+
   function handleNext(e) {
     e.preventDefault()
     nav('/booking-2')
   }
+
   return (
-    <div style={{padding:24}}>
+    <div style={{ padding: 24 }}>
       <h1>Booking - Step 1</h1>
-      <form onSubmit={handleNext} style={{display:'grid', gap:12, maxWidth:420}}>
+      <form onSubmit={handleNext} style={{ display: 'grid', gap: 12, maxWidth: 420 }}>
         <label>Nama
           <input required name="name" />
         </label>
