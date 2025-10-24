@@ -4,7 +4,8 @@ backend:
     build:
       commands:
         - npm ci
-        - npx ampx pipeline-deploy --branch $AMPLIFY_BRANCH --app-id $AMPLIFY_APP_ID
+        # Jalankan deploy backend Amplify Gen 2 (auth, dsb.)
+        - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
 frontend:
   phases:
     preBuild:
