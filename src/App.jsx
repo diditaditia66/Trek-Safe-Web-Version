@@ -16,7 +16,7 @@ import CreateAccount from './pages/CreateAccount'
 import SignIn from './pages/SignIn'
 
 function Protected({ children }) {
-  const { authStatus } = useAuthenticator(context => [context.authStatus])
+  const { authStatus } = useAuthenticator(ctx => [ctx.authStatus])
   if (authStatus === 'configuring') return null
   if (authStatus !== 'authenticated') return <Navigate to="/sign-in" replace />
   return children
