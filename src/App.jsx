@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuthenticator } from '@aws-amplify/ui-react'
 import '@aws-amplify/ui-react/styles.css'
 
@@ -17,27 +17,63 @@ import SignIn from './pages/SignIn'
 
 function Protected({ children }) {
   const { authStatus } = useAuthenticator(ctx => [ctx.authStatus])
+  const location = useLocation()
+
+  // Tahan render saat Amplify masih konfigurasi
   if (authStatus === 'configuring') return null
-  if (authStatus !== 'authenticated') return <Navigate to="/sign-in" replace />
+
+  // Saat kembali dari Google/Cognito, URL punya ?code=...&state=...
+  // Jangan redirect ke /sign-in di fase ini — biarkan Amplify memproses session.
+  const qs = location.search || ''
+  const hash = location.hash || ''
+  const isOAuthCallback =
+    /[?&](code|state)=/.test(qs) || /(code|state)=/.test(hash)
+  if (isOAuthCallback) return null
+
+  if (authStatus !== 'authenticated') {
+    return <Navigate to="/sign-in" replace state={{ from: location }} />
+  }
   return children
+}
+
+// Layout private: Navbar + halaman isi, hanya untuk user yang sudah login
+function PrivateLayout() {
+  return (
+    <>
+      <Navbar />
+      <Outlet />
+    </>
+  )
 }
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Navbar />
       <Routes>
+        {/* Public routes */}
         <Route path="/sign-in" element={<SignIn />} />
         <Route path="/create-account" element={<CreateAccount />} />
-        <Route path="/" element={<Protected><Home /></Protected>} />
-        <Route path="/home" element={<Protected><Home /></Protected>} />
-        <Route path="/profile" element={<Protected><Profile /></Protected>} />
-        <Route path="/chat" element={<Protected><Chat /></Protected>} />
-        <Route path="/activities" element={<Protected><Activities /></Protected>} />
-        <Route path="/achievement" element={<Protected><Achievement /></Protected>} />
-        <Route path="/booking" element={<Protected><Booking /></Protected>} />
-        <Route path="/booking-2" element={<Protected><Booking2 /></Protected>} />
-        <Route path="/checkout" element={<Protected><Checkout /></Protected>} />
+
+        {/* Protected routes (dengan Navbar) */}
+        <Route
+          element={
+            <Protected>
+              <PrivateLayout />
+            </Protected>
+          }
+        >
+          <Route index element={<Home />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/activities" element={<Activities />} />
+          <Route path="/achievement" element={<Achievement />} />
+          <Route path="/booking" element={<Booking />} />
+          <Route path="/booking-2" element={<Booking2 />} />
+          <Route path="/checkout" element={<Checkout />} />
+        </Route>
+
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
