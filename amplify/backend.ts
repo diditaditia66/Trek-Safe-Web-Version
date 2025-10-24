@@ -1,12 +1,8 @@
-// amplify/backend.ts
 import { defineBackend } from '@aws-amplify/backend'
 import { auth } from './auth/resource'
 
-// Jika nanti kamu menambah resource lain seperti database, storage, dsb.,
-// cukup impor di sini dan masukkan ke dalam objek defineBackend.
-// Contoh:
+// Jika nanti ingin menambah data, storage, dsb.
 // import { data } from './data/resource'
-// const backend = defineBackend({ auth, data })
 
 const backend = defineBackend({
   auth,

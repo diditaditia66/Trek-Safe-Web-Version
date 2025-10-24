@@ -1,17 +1,19 @@
 import { defineAuth, secret } from '@aws-amplify/backend'
 
 export const auth = defineAuth({
-  // Jenis login utama
   loginWith: {
     email: true,
 
-    // Login sosial (Google)
+    // Google SSO
     externalProviders: {
+      // redirect & logout URLs ditempatkan di level externalProviders
       callbackUrls: [
-        'http://localhost:5173/', // untuk dev lokal
+        'http://localhost:5173/',
+        'https://trek-safe.didit-aditia.my.id/',
       ],
       logoutUrls: [
         'http://localhost:5173/',
+        'https://trek-safe.didit-aditia.my.id/',
       ],
       google: {
         clientId: secret('GOOGLE_CLIENT_ID'),
@@ -26,15 +28,13 @@ export const auth = defineAuth({
     },
   },
 
-  // MFA dinonaktifkan
-  multifactor: {
-    mode: 'OFF',
-  },
+  multifactor: { mode: 'OFF' },
 
-  // Atribut user
   userAttributes: {
     email: { required: true, mutable: false },
     givenName: { required: false, mutable: true },
     familyName: { required: false, mutable: true },
   },
+
+  accountRecovery: 'EMAIL_ONLY',
 })
